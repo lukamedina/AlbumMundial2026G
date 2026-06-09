@@ -10,6 +10,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+<!-- ══ Configuración Firebase (excluida de git — ver .gitignore) ══ -->
+<script src="firebase-config.js"></script>
 
 <style>
 /* ── Reset & tokens ─────────────────────────────────────────────── */
@@ -56,7 +58,7 @@ header{
   font-size:15px;cursor:pointer;display:none;
 }
 
-/* ── Auth bar (NUEVO) ───────────────────────────────────────────── */
+/* ── Auth bar ───────────────────────────────────────────────────── */
 .auth-bar{
   background:#1a3358;padding:7px 14px;
   display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -248,16 +250,20 @@ main{padding:12px;}
 //  match /albums/{uid} {
 //    allow read, write: if request.auth != null && request.auth.uid == uid;
 //  }
+//
+//  ⚠ La config se carga desde firebase-config.js (excluida de git).
+//    Para dev local → copia firebase-config.example.js → firebase-config.js
+//    Para producción → GitHub Actions la genera desde GitHub Secrets
 // ════════════════════════════════════════════════════════════════════
-firebase.initializeApp({
-  apiKey:            "AIzaSyBDwnHhAfwvECuXBATBLnboNjmu9nTzK7k",
-  authDomain:        "albummundial2026-3940c.firebaseapp.com",
-  projectId:         "albummundial2026-3940c",
-  storageBucket:     "albummundial2026-3940c.firebasestorage.app",
-  messagingSenderId: "16348074186",
-  appId:             "1:16348074186:web:122979b3a60d815ace2433",
-  measurementId:     "G-L1E5CK4XWZ",
-});
+if (!window.FIREBASE_CONFIG) {
+  document.getElementById('app').innerHTML = `
+    <div class="warn" style="margin:16px">
+      ⚙️ <b>Falta firebase-config.js</b><br>
+      Créala copiando <code>firebase-config.example.js</code> y rellena tus credenciales de Firebase.
+    </div>`;
+  throw new Error('[Firebase] firebase-config.js no encontrado — ver firebase-config.example.js');
+}
+firebase.initializeApp(window.FIREBASE_CONFIG);
 const auth = firebase.auth();
 const fsDB = firebase.firestore();
 const COL  = 'albums'; // colección Firestore
@@ -409,13 +415,20 @@ function updateAuthUI(user) {
 
 function doSignIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .catch(err => {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        toast('❌ Error al iniciar sesión');
-        console.error(err);
-      }
-    });
+  // En móvil los popups suelen estar bloqueados → usar redirect
+  if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    auth.signInWithRedirect(provider)
+      .catch(err => { toast(`❌ Error: ${err.code}`); console.error('[Auth]', err); });
+  } else {
+    auth.signInWithPopup(provider)
+      .catch(err => {
+        if (err.code === 'auth/popup-blocked') {
+          auth.signInWithRedirect(provider);        // fallback redirect
+        } else if (err.code !== 'auth/popup-closed-by-user') {
+          toast(`❌ Error: ${err.code}`); console.error('[Auth]', err);
+        }
+      });
+  }
 }
 
 function doSignOut() {
@@ -423,6 +436,16 @@ function doSignOut() {
     auth.signOut().then(() => toast('👋 Sesión cerrada'));
   }
 }
+
+// ════════════════════════════════════════════════════════════════════
+//  RESULTADO DE REDIRECT  (imprescindible para signInWithRedirect en móvil)
+// ════════════════════════════════════════════════════════════════════
+auth.getRedirectResult().catch(err => {
+  if (err.code && err.code !== 'auth/no-current-user') {
+    toast(`❌ Error inicio sesión: ${err.code}`);
+    console.error('[Auth redirect]', err);
+  }
+});
 
 // ════════════════════════════════════════════════════════════════════
 //  AUTH STATE LISTENER  (reemplaza el rndr() inicial)
