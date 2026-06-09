@@ -1,478 +1,676 @@
-<!DOCTYPE html>  
-<html lang="es">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">  
-<meta name="theme-color" content="#1e3a5f">  
-<title>Álbum Mundial 2026</title>  
-<style>  
-/* ── Reset & tokens ─────────────────────────────────────────────── */  
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:rgba(0,0,0,0)}  
-:root{  
-  --navy:    #1e3a5f;  
-  --navy2:   #2d5a8e;  
-  --green:   #22c55e;  
-  --greenL:  #dcfce7;  
-  --greenD:  #15803d;  
-  --red:     #ef4444;  
-  --redL:    #fee2e2;  
-  --slate:   #64748b;  
-  --slateL:  #f1f5f9;  
-  --slateM:  #e2e8f0;  
-  --text:    #0f172a;  
-}  
-body{  
-  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;  
-  background:var(--slateL);color:var(--text);min-height:100vh;  
-}  
-  
-/* ── Header ─────────────────────────────────────────────────────── */  
-header{  
-  background:var(--navy);padding:12px 14px 10px;  
-  position:sticky;top:0;z-index:100;  
-  box-shadow:0 2px 10px rgba(0,0,0,.3);  
-}  
-.h-title{  
-  color:#fff;font-size:14px;font-weight:700;  
-  margin-bottom:8px;letter-spacing:.3px;  
-}  
-.h-row{display:flex;gap:8px;}  
-#q{  
-  flex:1;padding:11px 14px;font-size:16px;/* ← evita zoom en iOS */  
-  border:none;border-radius:10px;background:#fff;  
-  color:var(--text);font-weight:500;outline:none;  
-  -webkit-appearance:none;  
-}  
-#q::placeholder{color:#94a3b8;font-weight:400;}  
-#xBtn{  
-  padding:11px 14px;background:rgba(255,255,255,.2);  
-  color:#fff;border:none;border-radius:10px;  
-  font-size:15px;cursor:pointer;display:none;  
-}  
-  
-/* ── Stats bar ──────────────────────────────────────────────────── */  
-.statbar{  
-  background:var(--navy2);color:#bdd;font-size:12px;  
-  padding:5px 14px;display:flex;justify-content:space-between;  
-}  
-  
-/* ── Layout base ────────────────────────────────────────────────── */  
-main{padding:12px;}  
-.stitle{  
-  font-size:11px;font-weight:600;color:var(--slate);  
-  text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;  
-}  
-  
-/* ── Vista: cuadrícula de países ────────────────────────────────── */  
-.grid-ctrs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}  
-.cc{  
-  background:#fff;border-radius:12px;padding:12px;  
-  cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.07);  
-  user-select:none;-webkit-user-select:none;  
-}  
-.cc:active{opacity:.75;}  
-.cc-code{font-size:20px;font-weight:700;color:var(--navy);}  
-.cc-sub{font-size:11px;color:var(--slate);margin-top:1px;}  
-.pb{height:4px;background:var(--slateM);border-radius:2px;margin-top:7px;overflow:hidden;}  
-.pbf{height:100%;background:var(--green);border-radius:2px;}  
-  
-/* ── Botón atrás ────────────────────────────────────────────────── */  
-.back{  
-  display:inline-flex;align-items:center;gap:4px;  
-  background:#fff;border:none;color:var(--navy);  
-  font-size:15px;font-weight:600;padding:10px 14px;  
-  border-radius:10px;margin-bottom:10px;cursor:pointer;  
-  box-shadow:0 1px 3px rgba(0,0,0,.07);  
-}  
-  
-/* ── Vista: detalle de país (cuadrícula 4 columnas) ─────────────── */  
-.det-header{  
-  background:#fff;border-radius:12px;padding:14px;  
-  margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);  
-}  
-.det-code{font-size:28px;font-weight:800;color:var(--navy);}  
-.det-sub{font-size:13px;color:var(--slate);margin-top:2px;}  
-.grid-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}  
-.nc{  
-  background:#fff;border-radius:9px;padding:10px 6px;  
-  text-align:center;cursor:pointer;  
-  box-shadow:0 1px 3px rgba(0,0,0,.07);  
-  border:2px solid transparent;  
-  user-select:none;-webkit-user-select:none;  
-}  
-.nc:active{opacity:.7;}  
-.nc.have{border-color:var(--green);background:var(--greenL);}  
-.nc .num{font-size:18px;font-weight:700;color:var(--text);}  
-.nc .ico{font-size:11px;margin-top:1px;color:var(--slateM);}  
-.nc.have .ico{color:var(--greenD);}  
-  
-/* ── Vista: carta individual ────────────────────────────────────── */  
-.single-card{  
-  background:#fff;border-radius:16px;padding:28px 20px;  
-  text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.08);  
-}  
-.sc-code{font-size:38px;font-weight:800;color:var(--navy);}  
-.sc-num{font-size:68px;font-weight:900;line-height:1;color:var(--navy2);margin-top:4px;}  
-.badge{  
-  display:inline-block;padding:6px 18px;border-radius:20px;  
-  font-size:14px;font-weight:600;margin:14px 0;  
-}  
-.badge.have{background:var(--greenL);color:var(--greenD);}  
-.badge.miss{background:var(--redL);color:#991b1b;}  
-.btn{  
-  display:block;width:100%;padding:15px;border:none;  
-  border-radius:12px;font-size:16px;font-weight:700;  
-  cursor:pointer;margin-top:8px;letter-spacing:.2px;  
-}  
-.btn:active{opacity:.85;}  
-.btn-add{background:var(--green);color:#fff;}  
-.btn-rm{background:var(--red);color:#fff;}  
-  
-/* ── Toast ──────────────────────────────────────────────────────── */  
-.toast{  
-  position:fixed;bottom:28px;left:50%;  
-  transform:translateX(-50%) translateY(80px);  
-  background:#1e293b;color:#fff;padding:11px 20px;  
-  border-radius:99px;font-size:14px;font-weight:500;  
-  z-index:999;white-space:nowrap;  
-  transition:transform .25s cubic-bezier(.34,1.56,.64,1);  
-  box-shadow:0 4px 14px rgba(0,0,0,.3);  
-}  
-.toast.on{transform:translateX(-50%) translateY(0);}  
-  
-/* ── Empty state ────────────────────────────────────────────────── */  
-.empty{text-align:center;padding:48px 20px;color:var(--slate);font-size:15px;}  
-.empty b{display:block;font-size:28px;margin-bottom:8px;}  
-  
-/* ── Reset ──────────────────────────────────────────────────────── */  
-.reset-zone{margin-top:28px;text-align:center;padding-bottom:16px;}  
-.btn-rst{  
-  background:none;border:1px solid var(--slateM);color:var(--slate);  
-  padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;  
-}  
-  
-/* ── Warning banner ─────────────────────────────────────────────── */  
-.warn{  
-  background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;  
-  padding:10px 12px;font-size:12px;color:#92400e;  
-  margin-bottom:12px;line-height:1.5;  
-}  
-</style>  
-</head>  
-<body>  
-  
-<header>  
-  <div class="h-title">⚽ Álbum Mundial 2026 — 48 países cargados</div>  
-  <div class="h-row">  
-    <input id="q" type="text" placeholder="ARG  ·  ARG 18"  
-      autocomplete="off" autocorrect="off"  
-      autocapitalize="characters" spellcheck="false"  
-      oninput="rndr()">  
-    <button id="xBtn" onclick="clrQ()">✕</button>  
-  </div>  
-</header>  
-  
-<div class="statbar" id="sb"></div>  
-<main id="app"></main>  
-<div class="toast" id="tst"></div>  
-  
-<script>  
-// ════════════════════════════════════════════════════════════════════  
-//  DATOS INICIALES — colección actual del usuario  
-//  ⚠ IRN aparece duplicado en la DB original (entradas 1 y 38).  
-//    Se cargó una sola vez. Confirma qué país debería ser la #38  
-//    y añádelo aquí como: CODIGO:[nums...]  
-// ════════════════════════════════════════════════════════════════════  
-const INIT = {
-  ALG: [1, 2, 4, 5, 9, 10, 12, 13, 17, 19],
-  ARG: [3, 4, 5, 6, 7, 10, 13, 15, 19, 20],
-  AUS: [1, 2, 3, 5, 6, 8, 10, 11, 13, 14, 18],
-  AUT: [1, 3, 9, 10, 11, 13, 17, 19],
-  BEL: [2, 6, 7, 8, 9, 10, 12, 14, 16, 17, 18, 20],
-  BIH: [1, 7, 8, 12, 13, 14, 16, 17, 20],
-  BRA: [2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 16, 17, 19],
-  CAN: [2, 4, 5, 6, 7, 10, 15, 16, 17, 18, 20],
-  CIV: [1, 3, 4, 7, 9, 10, 11, 13, 15, 18, 19, 20],
-  COD: [4, 5, 8, 9, 10, 13, 15, 19],
-  COL: [1, 4, 5, 8, 12, 13, 16, 17, 18, 19, 20],
-  CPV: [1, 3, 5, 6, 8, 11, 13, 14, 16],
-  CRO: [1, 4, 5, 6, 9, 10, 12, 14, 15, 18, 19],
-  CUW: [1, 4, 10, 15, 19],
-  CZE: [4, 6, 8, 10, 13, 16, 17, 18],
-  ECU: [1, 2, 4, 6, 10, 12, 13, 15, 17, 19],
-  EGY: [2, 3, 5, 7, 10, 11, 12, 14, 15, 16, 19],
-  ENG: [1, 4, 5, 7, 8, 9, 14, 15, 17, 18, 19],
-  ESP: [2, 3, 4, 6, 7, 8, 9, 11, 12, 15, 16, 17, 18, 19, 20],
-  FRA: [2, 6, 7, 8, 10, 12, 14, 16, 17, 20],
-  GER: [],
-  GHA: [1, 5, 8, 9, 12, 14, 15, 17, 18],
-  HAI: [2, 10, 11, 13, 15, 16, 19, 20],
-  IRN: [2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20],
-  IRQ: [1, 2, 8, 9, 12, 14, 17, 20],
-  JOR: [2, 5, 6, 9, 10, 12, 17],
-  JPN: [2, 3, 4, 5, 6, 8, 10, 12, 15, 17, 19],
-  KOR: [2, 6, 10, 11, 12, 13, 15, 19],
-  KSA: [4, 8, 10, 11, 14, 15, 17, 18, 19, 20],
-  MAR: [3, 4, 7, 8, 9, 11, 12, 14, 15, 17, 19],
-  MEX: [2, 3, 4, 6, 10, 13, 15, 17, 18, 19, 20],
-  NED: [2, 3, 5, 8, 10, 15, 17, 20],
-  NOR: [1, 5, 9, 14, 16, 18, 19],
-  NZL: [2, 6, 8, 10, 13, 15, 16, 17, 19],
-  PAN: [2, 4, 6, 10, 12, 13, 15, 18, 19, 20],
-  PAR: [4, 6, 8, 10, 12, 13, 15, 17, 19],
-  POR: [1, 2, 4, 6, 9, 10, 12, 13, 15, 17, 19],
-  QAT: [2, 3, 6, 7, 8, 11, 12, 16, 17],
-  RSA: [1, 3, 5, 6, 8, 9, 10, 12, 13, 14, 15, 18, 19, 20],
-  SCO: [1, 3, 4, 7, 8, 12, 13, 17],
-  SEN: [2, 5, 6, 7, 10, 13, 16, 18],
-  SUI: [2, 3, 6, 7, 8, 10, 11, 12, 16, 17],
-  SWE: [1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 19, 20],
-  TUN: [2, 6, 8, 12, 14, 15, 17, 19],
-  TUR: [1, 4, 6, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19],
-  URU: [1, 3, 4, 7, 8, 11, 12, 15, 16, 17, 19, 20],
-  USA: [1, 2, 6, 9, 10, 17, 19],
-  UZB: [3, 4, 8, 12, 17, 19, 20],
-};
-  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e3a5f">
+<title>Álbum Mundial 2026</title>
 
-const KEY  = 'album_m48';   // clave localStorage  
-const MAX  = 20;             // cartas por país (1–20)  
-const CTRS = Object.keys(INIT).sort();  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  STORAGE  
-// ════════════════════════════════════════════════════════════════════  
-function load() {  
-  try {  
-    const s = localStorage.getItem(KEY);  
-    return s ? JSON.parse(s) : null;  
-  } catch { return null; }  
-}  
-function save(d) {  
-  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {}  
-}  
-  
-let DB = load() || JSON.parse(JSON.stringify(INIT));  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  HELPERS  
-// ════════════════════════════════════════════════════════════════════  
-const has  = (c, n) => (DB[c] || []).includes(n);  
-const cnt  = c => (DB[c] || []).length;  
-const tot  = () => CTRS.reduce((s, c) => s + cnt(c), 0);  
-  
-function addCard(c, n) {  
-  if (!DB[c]) DB[c] = [];  
-  if (!has(c, n)) { DB[c].push(n); DB[c].sort((a, b) => a - b); save(DB); }  
-}  
-function rmCard(c, n) {  
-  if (!DB[c]) return;  
-  DB[c] = DB[c].filter(x => x !== n);  
-  save(DB);  
-}  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  PARSE — "ARG" → {c:"ARG",n:null}  "ARG 18" → {c:"ARG",n:18}  
-// ════════════════════════════════════════════════════════════════════  
-function parse(raw) {  
-  const q = raw.trim().toUpperCase().replace(/\s+/g, ' ');  
-  const m = q.match(/^([A-Z]{1,4})(?:\s+(\d+))?$/);  
-  if (!m) return null;  
-  return { c: m[1], n: m[2] ? parseInt(m[2], 10) : null };  
-}  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  TOAST  
-// ════════════════════════════════════════════════════════════════════  
-let ttimer;  
-function toast(msg) {  
-  const el = document.getElementById('tst');  
-  clearTimeout(ttimer);  
-  el.textContent = msg;  
-  el.classList.add('on');  
-  ttimer = setTimeout(() => el.classList.remove('on'), 2300);  
-}  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  ACCIONES  
-// ════════════════════════════════════════════════════════════════════  
-function doAdd(c, n) {  
-  addCard(c, n); toast(`✓ ${c} ${n} añadida`); rndr();  
-}  
-function doRm(c, n) {  
-  if (confirm(`Quitar ${c} ${n} del álbum?\n(tengo para intercambiar)`)) {  
-    rmCard(c, n); toast(`🔄 ${c} ${n} retirada`); rndr();  
-  }  
-}  
-function flip(c, n) {  
-  if (has(c, n)) {  
-    if (confirm(`${c} ${n} — ¿Quitar del álbum?\n(tengo para intercambiar)`)) {  
-      rmCard(c, n); toast(`🔄 ${c} ${n} retirada`); rndr();  
-    }  
-  } else {  
-    if (confirm(`${c} ${n} — ¿Añadir al álbum?`)) {  
-      addCard(c, n); toast(`✓ ${c} ${n} añadida`); rndr();  
-    }  
-  }  
-}  
-function goCtry(c) {  
-  document.getElementById('q').value = c;  
-  window.scrollTo(0, 0);  
-  rndr();  
-}  
-function clrQ() {  
-  document.getElementById('q').value = '';  
-  document.getElementById('xBtn').style.display = 'none';  
-  window.scrollTo(0, 0);  
-  rndr();  
-}  
-function doReset() {  
-  if (confirm('¿Resetear al estado inicial?\nSe perderán todos los cambios.')) {  
-    DB = JSON.parse(JSON.stringify(INIT));  
-    save(DB);  
-    toast('↺ Datos reseteados al estado inicial');  
-    rndr();  
-  }  
-}  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  VISTAS  
-// ════════════════════════════════════════════════════════════════════  
-  
-// Vista 1 — resumen de todos los países  
-function vOverview(filter) {  
-  let list = CTRS;  
-  if (filter) list = list.filter(c => c.startsWith(filter));  
-  
-  if (!list.length) return `  
-    <div class="empty">  
-      <b>🔍</b>Sin coincidencias para "${filter}"  
-    </div>`;  
-  
-  const warn = `  
-    <div class="warn">  
-      ⚠️ <strong>IRN duplicado:</strong> la entrada 38 de tu lista es idéntica a la 1 (IRN 1 4 18).  
-      Cuando identifiques el país correcto para esa posición, dímelo y lo añadimos con una línea.  
-    </div>`;  
-  
-  const cards = list.map(c => {  
-    const n = cnt(c);  
-    const pct = (n / MAX * 100).toFixed(0);  
-    return `  
-      <div class="cc" onclick="goCtry('${c}')">  
-        <div class="cc-code">${c}</div>  
-        <div class="cc-sub">${n}/${MAX} cartas</div>  
-        <div class="pb"><div class="pbf" style="width:${pct}%"></div></div>  
-      </div>`;  
-  }).join('');  
-  //    ${!filter ? warn : ''}  
-  return `  
-    <p class="stitle">${list.length} país${list.length > 1 ? 'es' : ''} — toca para ver cartas</p>  
-    <div class="grid-ctrs">${cards}</div>  
-    <div class="reset-zone">  
-      <button class="btn-rst" onclick="doReset()">↺ Resetear a datos iniciales</button>  
-    </div>`;  
-}  
-  
-// Vista 2 — cuadrícula de las 20 cartas de un país  
-function vCtry(c) {  
-  if (!CTRS.includes(c)) return `  
-    <div class="empty"><b>❓</b>País "${c}" no existe en el álbum</div>`;  
-  
-  const n = cnt(c);  
-  const pct = (n / MAX * 100).toFixed(0);  
-  const nums = Array.from({ length: MAX }, (_, i) => i + 1);  
-  
-  const grid = nums.map(num => {  
-    const h = has(c, num);  
-    return `  
-      <div class="nc${h ? ' have' : ''}" onclick="flip('${c}', ${num})">  
-        <div class="num">${num}</div>  
-        <div class="ico">${h ? '✓' : '·'}</div>  
-      </div>`;  
-  }).join('');  
-  
-  return `  
-    <button class="back" onclick="clrQ()">← Países</button>  
-    <div class="det-header">  
-      <div class="det-code">${c}</div>  
-      <div class="det-sub">${n}/${MAX} cartas · ${pct}%</div>  
-      <div class="pb" style="margin-top:8px">  
-        <div class="pbf" style="width:${pct}%"></div>  
-      </div>  
-    </div>  
-    <p class="stitle">Toca una carta para añadir / quitar</p>  
-    <div class="grid-nums">${grid}</div>`;  
-}  
-  
-// Vista 3 — carta individual  
-function vCard(c, n) {  
-  if (!CTRS.includes(c)) return `  
-    <div class="empty"><b>❓</b>País "${c}" no existe en el álbum</div>`;  
-  if (n < 1 || n > MAX) return `  
-    <div class="empty"><b>⚠️</b>Número inválido (1–${MAX})</div>`;  
-  
-  const h = has(c, n);  
-  const btn = h  
-    ? `<button class="btn btn-rm" onclick="doRm('${c}', ${n})">  
-         🔄 Quitar del álbum — tengo para intercambiar  
-       </button>`  
-    : `<button class="btn btn-add" onclick="doAdd('${c}', ${n})">  
-         + Añadir al álbum  
-       </button>`;  
-  
-  return `  
-    <button class="back" onclick="goCtry('${c}')">← ${c}</button>  
-    <div class="single-card">  
-      <div class="sc-code">${c}</div>  
-      <div class="sc-num">${n}</div>  
-      <div>  
-        <span class="badge ${h ? 'have' : 'miss'}">  
-          ${h ? '✓ En el álbum' : '✗ Falta'}  
-        </span>  
-      </div>  
-      ${btn}  
-    </div>`;  
-}  
-  
-// ════════════════════════════════════════════════════════════════════  
-//  RENDER PRINCIPAL  
-// ════════════════════════════════════════════════════════════════════  
-function rndr() {  
-  const raw   = document.getElementById('q').value;  
-  const xBtn  = document.getElementById('xBtn');  
-  const sb    = document.getElementById('sb');  
-  const app   = document.getElementById('app');  
-  
-  xBtn.style.display = raw ? 'block' : 'none';  
-  
-  const collected = tot();  
-  const total = CTRS.length * MAX;  
-  sb.innerHTML = `  
-    <span>📋 ${collected}/${total} (${(collected / total * 100).toFixed(1)}%)</span>  
-    <span>🌍 ${CTRS.length} países</span>`;  
-  
-  if (!raw) { app.innerHTML = vOverview(''); return; }  
-  
-  const p = parse(raw);  
-  if (!p) {  
-    app.innerHTML = `<div class="empty"><b>💡</b>Escribe ARG o ARG 18</div>`;  
-    return;  
-  }  
-  
-  const { c, n } = p;  
-  
-  if (CTRS.includes(c)) {  
-    // Coincidencia exacta de país  
-    app.innerHTML = (n !== null) ? vCard(c, n) : vCtry(c);  
-  } else {  
-    // Coincidencia parcial → filtrar overview  
-    app.innerHTML = vOverview(c);  
-  }  
-}  
-  
-// ── Init ──────────────────────────────────────────────────────────  
-rndr();  
-</script>  
-</body>  
-</html>  
+<!-- ══ Firebase SDK (compat v10) ══════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+
+<style>
+/* ── Reset & tokens ─────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:rgba(0,0,0,0)}
+:root{
+  --navy:    #1e3a5f;
+  --navy2:   #2d5a8e;
+  --green:   #22c55e;
+  --greenL:  #dcfce7;
+  --greenD:  #15803d;
+  --red:     #ef4444;
+  --redL:    #fee2e2;
+  --slate:   #64748b;
+  --slateL:  #f1f5f9;
+  --slateM:  #e2e8f0;
+  --text:    #0f172a;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;
+  background:var(--slateL);color:var(--text);min-height:100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+header{
+  background:var(--navy);padding:12px 14px 10px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 10px rgba(0,0,0,.3);
+}
+.h-title{
+  color:#fff;font-size:14px;font-weight:700;
+  margin-bottom:8px;letter-spacing:.3px;
+}
+.h-row{display:flex;gap:8px;}
+#q{
+  flex:1;padding:11px 14px;font-size:16px;
+  border:none;border-radius:10px;background:#fff;
+  color:var(--text);font-weight:500;outline:none;
+  -webkit-appearance:none;
+}
+#q::placeholder{color:#94a3b8;font-weight:400;}
+#xBtn{
+  padding:11px 14px;background:rgba(255,255,255,.2);
+  color:#fff;border:none;border-radius:10px;
+  font-size:15px;cursor:pointer;display:none;
+}
+
+/* ── Auth bar (NUEVO) ───────────────────────────────────────────── */
+.auth-bar{
+  background:#1a3358;padding:7px 14px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+/* Botón Google */
+.g-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#fff;border:none;border-radius:8px;
+  padding:7px 13px;font-size:13px;font-weight:600;
+  color:#3c4043;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+  white-space:nowrap;
+}
+.g-btn:active{opacity:.85;}
+.g-btn img{width:16px;height:16px;flex-shrink:0;}
+/* User info */
+.user-row{display:flex;align-items:center;gap:8px;}
+.u-photo{
+  width:26px;height:26px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.4);object-fit:cover;flex-shrink:0;
+}
+.u-avatar{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--navy2);border:2px solid rgba(255,255,255,.4);
+  display:inline-flex;align-items:center;justify-content:center;
+  color:#fff;font-size:12px;font-weight:700;flex-shrink:0;
+}
+.u-name{
+  color:#fff;font-size:12px;font-weight:500;
+  max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.signout-btn{
+  padding:4px 9px;background:rgba(255,255,255,.15);
+  color:#fff;border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap;
+}
+.signout-btn:active{opacity:.75;}
+/* Sync badge */
+.sync-badge{
+  font-size:11px;padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0;
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);
+}
+.sync-badge.syncing{color:#fbbf24;background:rgba(251,191,36,.12);}
+.sync-badge.synced {color:#4ade80;background:rgba(74,222,128,.12);}
+.sync-badge.err    {color:#f87171;background:rgba(248,113,113,.12);}
+
+/* ── Stats bar ──────────────────────────────────────────────────── */
+.statbar{
+  background:var(--navy2);color:#bdd;font-size:12px;
+  padding:5px 14px;display:flex;justify-content:space-between;
+}
+
+/* ── Layout base ────────────────────────────────────────────────── */
+main{padding:12px;}
+.stitle{
+  font-size:11px;font-weight:600;color:var(--slate);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+}
+
+/* ── Loading ─────────────────────────────────────────────────────── */
+.loading{text-align:center;padding:60px 20px;color:var(--slate);font-size:15px;}
+
+/* ── Vista: cuadrícula de países ────────────────────────────────── */
+.grid-ctrs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cc{
+  background:#fff;border-radius:12px;padding:12px;
+  cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.07);
+  user-select:none;-webkit-user-select:none;
+}
+.cc:active{opacity:.75;}
+.cc-code{font-size:20px;font-weight:700;color:var(--navy);}
+.cc-sub{font-size:11px;color:var(--slate);margin-top:1px;}
+.pb{height:4px;background:var(--slateM);border-radius:2px;margin-top:7px;overflow:hidden;}
+.pbf{height:100%;background:var(--green);border-radius:2px;}
+
+/* ── Botón atrás ────────────────────────────────────────────────── */
+.back{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#fff;border:none;color:var(--navy);
+  font-size:15px;font-weight:600;padding:10px 14px;
+  border-radius:10px;margin-bottom:10px;cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.07);
+}
+
+/* ── Vista: detalle de país ─────────────────────────────────────── */
+.det-header{
+  background:#fff;border-radius:12px;padding:14px;
+  margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);
+}
+.det-code{font-size:28px;font-weight:800;color:var(--navy);}
+.det-sub{font-size:13px;color:var(--slate);margin-top:2px;}
+.grid-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.nc{
+  background:#fff;border-radius:9px;padding:10px 6px;
+  text-align:center;cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.07);
+  border:2px solid transparent;
+  user-select:none;-webkit-user-select:none;
+}
+.nc:active{opacity:.7;}
+.nc.have{border-color:var(--green);background:var(--greenL);}
+.nc .num{font-size:18px;font-weight:700;color:var(--text);}
+.nc .ico{font-size:11px;margin-top:1px;color:var(--slateM);}
+.nc.have .ico{color:var(--greenD);}
+
+/* ── Vista: carta individual ────────────────────────────────────── */
+.single-card{
+  background:#fff;border-radius:16px;padding:28px 20px;
+  text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+.sc-code{font-size:38px;font-weight:800;color:var(--navy);}
+.sc-num{font-size:68px;font-weight:900;line-height:1;color:var(--navy2);margin-top:4px;}
+.badge{
+  display:inline-block;padding:6px 18px;border-radius:20px;
+  font-size:14px;font-weight:600;margin:14px 0;
+}
+.badge.have{background:var(--greenL);color:var(--greenD);}
+.badge.miss{background:var(--redL);color:#991b1b;}
+.btn{
+  display:block;width:100%;padding:15px;border:none;
+  border-radius:12px;font-size:16px;font-weight:700;
+  cursor:pointer;margin-top:8px;letter-spacing:.2px;
+}
+.btn:active{opacity:.85;}
+.btn-add{background:var(--green);color:#fff;}
+.btn-rm{background:var(--red);color:#fff;}
+
+/* ── Toast ──────────────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#1e293b;color:#fff;padding:11px 20px;
+  border-radius:99px;font-size:14px;font-weight:500;
+  z-index:999;white-space:nowrap;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 4px 14px rgba(0,0,0,.3);
+}
+.toast.on{transform:translateX(-50%) translateY(0);}
+
+/* ── Empty state ────────────────────────────────────────────────── */
+.empty{text-align:center;padding:48px 20px;color:var(--slate);font-size:15px;}
+.empty b{display:block;font-size:28px;margin-bottom:8px;}
+
+/* ── Reset ──────────────────────────────────────────────────────── */
+.reset-zone{margin-top:28px;text-align:center;padding-bottom:16px;}
+.btn-rst{
+  background:none;border:1px solid var(--slateM);color:var(--slate);
+  padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;
+}
+
+/* ── Warning banner ─────────────────────────────────────────────── */
+.warn{
+  background:#fffbeb;border:1px solid #fbbf24;border-radius:10px;
+  padding:10px 12px;font-size:12px;color:#92400e;
+  margin-bottom:12px;line-height:1.5;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-title">⚽ Álbum Mundial 2026 — 48 países cargados</div>
+  <div class="h-row">
+    <input id="q" type="text" placeholder="ARG  ·  ARG 18"
+      autocomplete="off" autocorrect="off"
+      autocapitalize="characters" spellcheck="false"
+      oninput="rndr()">
+    <button id="xBtn" onclick="clrQ()">✕</button>
+  </div>
+</header>
+
+<!-- ── Auth bar ──────────────────────────────────────────────────── -->
+<div class="auth-bar">
+  <div id="authContent">
+    <!-- Rellenado por JS -->
+  </div>
+  <div id="syncStatus" class="sync-badge">💾 Local</div>
+</div>
+
+<div class="statbar" id="sb"></div>
+<main id="app"><div class="loading">⏳ Iniciando…</div></main>
+<div class="toast" id="tst"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+//  FIREBASE INIT
+//  Reglas Firestore mínimas necesarias en tu consola:
+//  match /albums/{uid} {
+//    allow read, write: if request.auth != null && request.auth.uid == uid;
+//  }
+// ════════════════════════════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey:            "AIzaSyBDwnHhAfwvECuXBATBLnboNjmu9nTzK7k",
+  authDomain:        "albummundial2026-3940c.firebaseapp.com",
+  projectId:         "albummundial2026-3940c",
+  storageBucket:     "albummundial2026-3940c.firebasestorage.app",
+  messagingSenderId: "16348074186",
+  appId:             "1:16348074186:web:122979b3a60d815ace2433",
+  measurementId:     "G-L1E5CK4XWZ",
+});
+const auth = firebase.auth();
+const fsDB = firebase.firestore();
+const COL  = 'albums'; // colección Firestore
+
+// ════════════════════════════════════════════════════════════════════
+//  DATOS INICIALES
+//  ⚠ IRN aparece duplicado en la DB original (entradas 1 y 38).
+//    Se cargó una sola vez. Confirma qué país debería ser la #38.
+// ════════════════════════════════════════════════════════════════════
+const INIT = {
+  ALG: [1,2,4,5,9,10,12,13,17,19],
+  ARG: [3,4,5,6,7,10,13,15,19,20],
+  AUS: [1,2,3,5,6,8,10,11,13,14,18],
+  AUT: [1,3,9,10,11,13,17,19],
+  BEL: [2,6,7,8,9,10,12,14,16,17,18,20],
+  BIH: [1,7,8,12,13,14,16,17,20],
+  BRA: [2,4,5,6,7,8,9,10,11,12,15,16,17,19],
+  CAN: [2,4,5,6,7,10,15,16,17,18,20],
+  CIV: [1,3,4,7,9,10,11,13,15,18,19,20],
+  COD: [4,5,8,9,10,13,15,19],
+  COL: [1,4,5,8,12,13,16,17,18,19,20],
+  CPV: [1,3,5,6,8,11,13,14,16],
+  CRO: [1,4,5,6,9,10,12,14,15,18,19],
+  CUW: [1,4,10,15,19],
+  CZE: [4,6,8,10,13,16,17,18],
+  ECU: [1,2,4,6,10,12,13,15,17,19],
+  EGY: [2,3,5,7,10,11,12,14,15,16,19],
+  ENG: [1,4,5,7,8,9,14,15,17,18,19],
+  ESP: [2,3,4,6,7,8,9,11,12,15,16,17,18,19,20],
+  FRA: [2,6,7,8,10,12,14,16,17,20],
+  GER: [],
+  GHA: [1,5,8,9,12,14,15,17,18],
+  HAI: [2,10,11,13,15,16,19,20],
+  IRN: [2,3,5,6,7,8,9,10,11,12,13,14,15,16,17,19,20],
+  IRQ: [1,2,8,9,12,14,17,20],
+  JOR: [2,5,6,9,10,12,17],
+  JPN: [2,3,4,5,6,8,10,12,15,17,19],
+  KOR: [2,6,10,11,12,13,15,19],
+  KSA: [4,8,10,11,14,15,17,18,19,20],
+  MAR: [3,4,7,8,9,11,12,14,15,17,19],
+  MEX: [2,3,4,6,10,13,15,17,18,19,20],
+  NED: [2,3,5,8,10,15,17,20],
+  NOR: [1,5,9,14,16,18,19],
+  NZL: [2,6,8,10,13,15,16,17,19],
+  PAN: [2,4,6,10,12,13,15,18,19,20],
+  PAR: [4,6,8,10,12,13,15,17,19],
+  POR: [1,2,4,6,9,10,12,13,15,17,19],
+  QAT: [2,3,6,7,8,11,12,16,17],
+  RSA: [1,3,5,6,8,9,10,12,13,14,15,18,19,20],
+  SCO: [1,3,4,7,8,12,13,17],
+  SEN: [2,5,6,7,10,13,16,18],
+  SUI: [2,3,6,7,8,10,11,12,16,17],
+  SWE: [1,2,3,6,7,8,10,11,12,13,15,16,17,19,20],
+  TUN: [2,6,8,12,14,15,17,19],
+  TUR: [1,4,6,8,9,10,11,12,13,14,17,18,19],
+  URU: [1,3,4,7,8,11,12,15,16,17,19,20],
+  USA: [1,2,6,9,10,17,19],
+  UZB: [3,4,8,12,17,19,20],
+};
+
+const KEY  = 'album_m48';
+const MAX  = 20;
+const CTRS = Object.keys(INIT).sort();
+
+// ════════════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════════════
+let DB          = {};       // datos activos (siempre en memoria)
+let currentUser = null;     // usuario Firebase actual (null = sin sesión)
+
+// ════════════════════════════════════════════════════════════════════
+//  SYNC STATUS UI
+// ════════════════════════════════════════════════════════════════════
+function setSyncStatus(s) {
+  const el  = document.getElementById('syncStatus');
+  const map = {
+    local:   ['💾 Local',      ''],
+    syncing: ['⏳ Guardando…', 'syncing'],
+    synced:  ['✓ Nube',        'synced'],
+    err:     ['⚠ Error sync',  'err'],
+  };
+  const [text, cls] = map[s] || map['local'];
+  el.textContent = text;
+  el.className   = 'sync-badge' + (cls ? ' ' + cls : '');
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  FIRESTORE HELPERS
+// ════════════════════════════════════════════════════════════════════
+async function cloudLoad(uid) {
+  try {
+    const snap = await fsDB.collection(COL).doc(uid).get();
+    return snap.exists ? snap.data() : null;
+  } catch(e) { console.error('[FS load]', e); return null; }
+}
+
+function cloudSave(uid, data) {
+  setSyncStatus('syncing');
+  fsDB.collection(COL).doc(uid).set(data)
+    .then(()  => setSyncStatus('synced'))
+    .catch(e  => { console.error('[FS save]', e); setSyncStatus('err'); });
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  LOCAL STORAGE
+// ════════════════════════════════════════════════════════════════════
+function loadLocal() {
+  try {
+    const s = localStorage.getItem(KEY);
+    return s ? JSON.parse(s) : null;
+  } catch { return null; }
+}
+function saveLocal(d) {
+  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {}
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  SAVE UNIFICADO  (local siempre + nube si hay sesión)
+// ════════════════════════════════════════════════════════════════════
+function save(d) {
+  saveLocal(d);
+  if (currentUser) cloudSave(currentUser.uid, d);
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  AUTH UI
+// ════════════════════════════════════════════════════════════════════
+function updateAuthUI(user) {
+  const el = document.getElementById('authContent');
+  if (user) {
+    const name     = user.displayName || user.email || 'Usuario';
+    const photoEl  = user.photoURL
+      ? `<img class="u-photo" src="${user.photoURL}" alt="">`
+      : `<span class="u-avatar">${name[0].toUpperCase()}</span>`;
+    el.innerHTML = `
+      <div class="user-row">
+        ${photoEl}
+        <span class="u-name">${name}</span>
+        <button class="signout-btn" onclick="doSignOut()">Salir</button>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <button class="g-btn" onclick="doSignIn()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+        Iniciar sesión con Google
+      </button>`;
+  }
+}
+
+function doSignIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .catch(err => {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        toast('❌ Error al iniciar sesión');
+        console.error(err);
+      }
+    });
+}
+
+function doSignOut() {
+  if (confirm('¿Cerrar sesión?\nTus datos siguen guardados en la nube.')) {
+    auth.signOut().then(() => toast('👋 Sesión cerrada'));
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  AUTH STATE LISTENER  (reemplaza el rndr() inicial)
+//
+//  Lógica de carga:
+//  • Con sesión → intenta Firestore primero
+//      ├─ Tiene datos en nube  → los usa (ignora local)
+//      └─ Sin datos en nube   → migra localStorage → nube (primera vez)
+//  • Sin sesión → usa localStorage normalmente
+// ════════════════════════════════════════════════════════════════════
+auth.onAuthStateChanged(async (user) => {
+  currentUser = user;
+  updateAuthUI(user);
+
+  if (user) {
+    document.getElementById('app').innerHTML =
+      '<div class="loading">☁️ Cargando desde la nube…</div>';
+
+    const cloudData = await cloudLoad(user.uid);
+
+    if (cloudData) {
+      // Datos existentes en Firestore: úsalos como fuente de verdad
+      DB = cloudData;
+      saveLocal(DB);         // mantener local sincronizado
+      setSyncStatus('synced');
+      toast('☁️ Datos cargados desde la nube');
+    } else {
+      // Primera vez con esta cuenta: migrar localStorage → Firestore
+      DB = loadLocal() || JSON.parse(JSON.stringify(INIT));
+      cloudSave(user.uid, DB);
+      toast('☁️ Datos migrados a la nube ✓');
+    }
+  } else {
+    // Sin sesión: solo localStorage
+    DB = loadLocal() || JSON.parse(JSON.stringify(INIT));
+    setSyncStatus('local');
+  }
+
+  rndr();
+});
+
+// ════════════════════════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════════════════════════
+const has  = (c, n) => (DB[c] || []).includes(n);
+const cnt  = c => (DB[c] || []).length;
+const tot  = () => CTRS.reduce((s, c) => s + cnt(c), 0);
+
+function addCard(c, n) {
+  if (!DB[c]) DB[c] = [];
+  if (!has(c, n)) { DB[c].push(n); DB[c].sort((a, b) => a - b); save(DB); }
+}
+function rmCard(c, n) {
+  if (!DB[c]) return;
+  DB[c] = DB[c].filter(x => x !== n);
+  save(DB);
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  PARSE — "ARG" → {c:"ARG",n:null}   "ARG 18" → {c:"ARG",n:18}
+// ════════════════════════════════════════════════════════════════════
+function parse(raw) {
+  const q = raw.trim().toUpperCase().replace(/\s+/g, ' ');
+  const m = q.match(/^([A-Z]{1,4})(?:\s+(\d+))?$/);
+  if (!m) return null;
+  return { c: m[1], n: m[2] ? parseInt(m[2], 10) : null };
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════════════════════════════
+let ttimer;
+function toast(msg) {
+  const el = document.getElementById('tst');
+  clearTimeout(ttimer);
+  el.textContent = msg;
+  el.classList.add('on');
+  ttimer = setTimeout(() => el.classList.remove('on'), 2300);
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  ACCIONES
+// ════════════════════════════════════════════════════════════════════
+function doAdd(c, n) {
+  addCard(c, n); toast(`✓ ${c} ${n} añadida`); rndr();
+}
+function doRm(c, n) {
+  if (confirm(`Quitar ${c} ${n} del álbum?\n(tengo para intercambiar)`)) {
+    rmCard(c, n); toast(`🔄 ${c} ${n} retirada`); rndr();
+  }
+}
+function flip(c, n) {
+  if (has(c, n)) {
+    if (confirm(`${c} ${n} — ¿Quitar del álbum?\n(tengo para intercambiar)`)) {
+      rmCard(c, n); toast(`🔄 ${c} ${n} retirada`); rndr();
+    }
+  } else {
+    if (confirm(`${c} ${n} — ¿Añadir al álbum?`)) {
+      addCard(c, n); toast(`✓ ${c} ${n} añadida`); rndr();
+    }
+  }
+}
+function goCtry(c) {
+  document.getElementById('q').value = c;
+  window.scrollTo(0, 0);
+  rndr();
+}
+function clrQ() {
+  document.getElementById('q').value = '';
+  document.getElementById('xBtn').style.display = 'none';
+  window.scrollTo(0, 0);
+  rndr();
+}
+function doReset() {
+  if (confirm('¿Resetear al estado inicial?\nSe perderán todos los cambios.')) {
+    DB = JSON.parse(JSON.stringify(INIT));
+    save(DB);   // borra tanto local como nube
+    toast('↺ Datos reseteados al estado inicial');
+    rndr();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  VISTAS
+// ════════════════════════════════════════════════════════════════════
+
+// Vista 1 — resumen de todos los países
+function vOverview(filter) {
+  let list = CTRS;
+  if (filter) list = list.filter(c => c.startsWith(filter));
+
+  if (!list.length) return `
+    <div class="empty">
+      <b>🔍</b>Sin coincidencias para "${filter}"
+    </div>`;
+
+  const cards = list.map(c => {
+    const n   = cnt(c);
+    const pct = (n / MAX * 100).toFixed(0);
+    return `
+      <div class="cc" onclick="goCtry('${c}')">
+        <div class="cc-code">${c}</div>
+        <div class="cc-sub">${n}/${MAX} cartas</div>
+        <div class="pb"><div class="pbf" style="width:${pct}%"></div></div>
+      </div>`;
+  }).join('');
+
+  return `
+    <p class="stitle">${list.length} país${list.length > 1 ? 'es' : ''} — toca para ver cartas</p>
+    <div class="grid-ctrs">${cards}</div>
+    <div class="reset-zone">
+      <button class="btn-rst" onclick="doReset()">↺ Resetear a datos iniciales</button>
+    </div>`;
+}
+
+// Vista 2 — cuadrícula de las 20 cartas de un país
+function vCtry(c) {
+  if (!CTRS.includes(c)) return `
+    <div class="empty"><b>❓</b>País "${c}" no existe en el álbum</div>`;
+
+  const n   = cnt(c);
+  const pct = (n / MAX * 100).toFixed(0);
+  const grid = Array.from({ length: MAX }, (_, i) => i + 1).map(num => {
+    const h = has(c, num);
+    return `
+      <div class="nc${h ? ' have' : ''}" onclick="flip('${c}', ${num})">
+        <div class="num">${num}</div>
+        <div class="ico">${h ? '✓' : '·'}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <button class="back" onclick="clrQ()">← Países</button>
+    <div class="det-header">
+      <div class="det-code">${c}</div>
+      <div class="det-sub">${n}/${MAX} cartas · ${pct}%</div>
+      <div class="pb" style="margin-top:8px">
+        <div class="pbf" style="width:${pct}%"></div>
+      </div>
+    </div>
+    <p class="stitle">Toca una carta para añadir / quitar</p>
+    <div class="grid-nums">${grid}</div>`;
+}
+
+// Vista 3 — carta individual
+function vCard(c, n) {
+  if (!CTRS.includes(c)) return `
+    <div class="empty"><b>❓</b>País "${c}" no existe en el álbum</div>`;
+  if (n < 1 || n > MAX) return `
+    <div class="empty"><b>⚠️</b>Número inválido (1–${MAX})</div>`;
+
+  const h   = has(c, n);
+  const btn = h
+    ? `<button class="btn btn-rm" onclick="doRm('${c}', ${n})">
+         🔄 Quitar del álbum — tengo para intercambiar
+       </button>`
+    : `<button class="btn btn-add" onclick="doAdd('${c}', ${n})">
+         + Añadir al álbum
+       </button>`;
+
+  return `
+    <button class="back" onclick="goCtry('${c}')">← ${c}</button>
+    <div class="single-card">
+      <div class="sc-code">${c}</div>
+      <div class="sc-num">${n}</div>
+      <div>
+        <span class="badge ${h ? 'have' : 'miss'}">
+          ${h ? '✓ En el álbum' : '✗ Falta'}
+        </span>
+      </div>
+      ${btn}
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  RENDER PRINCIPAL
+// ════════════════════════════════════════════════════════════════════
+function rndr() {
+  const raw  = document.getElementById('q').value;
+  const xBtn = document.getElementById('xBtn');
+  const sb   = document.getElementById('sb');
+  const app  = document.getElementById('app');
+
+  xBtn.style.display = raw ? 'block' : 'none';
+
+  const collected = tot();
+  const total     = CTRS.length * MAX;
+  sb.innerHTML = `
+    <span>📋 ${collected}/${total} (${(collected / total * 100).toFixed(1)}%)</span>
+    <span>🌍 ${CTRS.length} países</span>`;
+
+  if (!raw) { app.innerHTML = vOverview(''); return; }
+
+  const p = parse(raw);
+  if (!p) {
+    app.innerHTML = `<div class="empty"><b>💡</b>Escribe ARG o ARG 18</div>`;
+    return;
+  }
+
+  const { c, n } = p;
+  if (CTRS.includes(c)) {
+    app.innerHTML = (n !== null) ? vCard(c, n) : vCtry(c);
+  } else {
+    app.innerHTML = vOverview(c);
+  }
+}
+
+// ── El render inicial lo dispara auth.onAuthStateChanged ─────────
+</script>
+</body>
+</html>
